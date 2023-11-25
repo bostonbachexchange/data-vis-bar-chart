@@ -59,13 +59,14 @@ function App() {
         .attr('width', width + margin.left + margin.right)
         .attr('height', height + margin.top + margin.bottom)
         .append('g')
+        .attr("fill", "darkgreen")
         .attr('transform', `translate(${margin.left},${margin.top})`)
       : existingSvg.select('g');
 
 const tip = d3Tip()
   .attr('class', 'd3-tip')
   .style('background-color', '#f8f9fa') // Set the background color
-  .style('color', '#212529') // Set the font color
+  .style('color', '#212529') 
   .offset([-10, 0])
   .html(d => `<strong>${d.date}:</strong> ${d.value.toString().substring(0, 3)}%`);
 
@@ -108,6 +109,7 @@ const tip = d3Tip()
     .attr('dy', '.15em')
     .style('font-size', '12px') // Adjust font size as needed
     .style('margin-top', '15px');
+    
 
     svg
       .append('g')
