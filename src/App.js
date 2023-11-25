@@ -30,7 +30,7 @@ function App() {
   };
 
   useEffect(() => {
-    fetch(`http://api.worldbank.org/v2/country/${country}/indicator/FP.CPI.TOTL.ZG?format=json`)
+    fetch(`https://api.worldbank.org/v2/country/${country}/indicator/FP.CPI.TOTL.ZG?format=json`)
       .then(response => response.json())
       .then(apiData => {
         
