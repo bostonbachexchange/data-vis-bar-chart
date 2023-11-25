@@ -10,7 +10,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const fetchCountriesByPage = async (page) => {
-    const response = await fetch(`http://api.worldbank.org/v2/country?format=json&page=${page}`);
+    const response = await fetch(`https://api.worldbank.org/v2/country?format=json&page=${page}`);
     const data = await response.json();
     return data[1] || []; // Return an empty array if data is undefined
   };
