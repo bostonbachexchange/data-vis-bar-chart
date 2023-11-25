@@ -4,26 +4,53 @@ import * as d3 from 'd3';
 import d3Tip from 'd3-tip';
 
 function App() {
-  const [data, setData] = useState([]);
+  const [dataset, setDataset] = useState([]);
+  const [country, setCountry] = useState("USA"); 
+  const [countries, setCountries] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const fetchCountriesByPage = async (page) => {
+    const response = await fetch(`http://api.worldbank.org/v2/country?format=json&page=${page}`);
+    const data = await response.json();
+    return data[1] || []; // Return an empty array if data is undefined
+  };
 
   useEffect(() => {
-    fetch('http://api.worldbank.org/v2/country/USA/indicator/FP.CPI.TOTL.ZG?format=json')
+    const fetchCountries = async () => {
+      const countriesData = await fetchCountriesByPage(currentPage);
+      setCountries(prevCountries => [...prevCountries, ...countriesData]);
+    };
+  
+    fetchCountries();
+  }, [currentPage]);
+  
+  // Add a button or some UI element to load more countries
+  const loadMoreCountries = () => {
+    setCurrentPage(prevPage => prevPage + 1);
+  };
+
+  useEffect(() => {
+    fetch(`http://api.worldbank.org/v2/country/${country}/indicator/FP.CPI.TOTL.ZG?format=json`)
       .then(response => response.json())
       .then(apiData => {
+        
+        const countryData = {country: apiData[1][0]["country"]["value"]}
         const chartData = apiData[1].map(entry => ({
           date: entry.date,
           value: entry.value,
         }));
-
+        setDataset(chartData)
+        setCountry(countryData)
         drawChart(chartData);
       })
       .catch(error => console.error('Error fetching data:', error));
-  }, []);
+  }, [country]);
 
   const drawChart = (chartData) => {
-    const margin = { top: 20, right: 20, bottom: 30, left: 40 };
-    const width = 600 - margin.left - margin.right;
+    const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+    const width = 1200 - margin.left - margin.right;
     const height = 400 - margin.top - margin.bottom;
+
 
     // Check if SVG already exists
     const existingSvg = d3.select('#chart-container svg');
@@ -35,31 +62,34 @@ function App() {
         .attr('transform', `translate(${margin.left},${margin.top})`)
       : existingSvg.select('g');
 
-    const tip = d3Tip()
-      .attr('class', 'd3-tip')
-      .offset([-10, 0])
-      .html(d => 
-        `<strong >${d.date}:</strong> ${d.value.toString().substring(0, 3)}%`
-        );
+const tip = d3Tip()
+  .attr('class', 'd3-tip')
+  .style('background-color', '#f8f9fa') // Set the background color
+  .style('color', '#212529') // Set the font color
+  .offset([-10, 0])
+  .html(d => `<strong>${d.date}:</strong> ${d.value.toString().substring(0, 3)}%`);
 
     svg.call(tip);
 
     const xScale = d3
       .scaleBand()
       .domain(chartData.map(d => d.date).reverse())
-      .range([0, width])
-      .padding(0.11);
+      .range([0, width ])
+      .padding(0.2);
 
     const yScale = d3
       .scaleLinear()
-      .domain([0, d3.max(chartData, d => d.value)])
+      .domain([d3.min(chartData, d => d.value), d3.max(chartData, d => d.value)])
       .range([height, 0]);
 
     // const xAxis = d3.axisBottom(xScale).tickFormat(d => d).tickSize(0);
 
-    const xAxis = d3.axisBottom(xScale).tickFormat(d => d).tickSize(0);
-
-
+    // const xAxis = d3.axisBottom(xScale).tickFormat(d => d).tickSize(0);
+    const xAxis = d3.axisBottom(xScale)
+    .tickFormat(d => d)
+    .ticks(chartData.length) // Set the number of ticks equal to the number of data points
+    .tickValues(chartData.map(d => d.date).reverse());
+    
 
     const yAxis = d3.axisLeft(yScale);
 
@@ -74,13 +104,10 @@ function App() {
     .selectAll('text')
     .attr('transform', 'rotate(-45)')
     .style('text-anchor', 'end')
-    .attr('dx', '-.8em') // Adjustments for rotated text
-    .attr('dy', '.15em');
-    // svg
-    //   .append('g')
-    //   .attr('class', 'x-axis')
-    //   .attr('transform', `translate(0, ${height})`)
-    //   .call(xAxis);
+    .attr('dx', '-.5em') // Adjustments for rotated text
+    .attr('dy', '.15em')
+    .style('font-size', '12px') // Adjust font size as needed
+    .style('margin-top', '15px');
 
     svg
       .append('g')
@@ -103,9 +130,29 @@ function App() {
       .on('mouseout', tip.hide);
   };
 
+  const handleCountryChange = (event) => {
+    setCountry(event.target.value);
+  };
+
   return (
     <div className="text-center">
-      <div id="chart-container"></div>
+      <h1>Inflation {country.country}</h1>
+      <div className='m-2 p-4' id="chart-container"></div>
+      <h2 className='mt-2'>Select a Country</h2>
+      <form className='mb-4'>
+        <label>
+          Select Country:
+          <select value={country} onChange={handleCountryChange}>
+            {countries.map(country => (
+              <option  value={country.id}>
+                {country.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      </form>
+      <button onClick={loadMoreCountries}>Load More Countries</button>
+
     </div>
   );
 }
