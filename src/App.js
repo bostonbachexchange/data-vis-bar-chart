@@ -59,7 +59,10 @@ function App() {
         .attr('width', width + margin.left + margin.right)
         .attr('height', height + margin.top + margin.bottom)
         .append('g')
-        .attr("fill", "darkgreen")
+        // .attr('fill', (d) => {
+        //   console.log('Value:', d); // Add this console log
+        //   return d.value >= 0 ? 'darkgreen' : 'darkred';
+        // })
         .attr('transform', `translate(${margin.left},${margin.top})`)
       : existingSvg.select('g');
 
@@ -128,6 +131,7 @@ const tip = d3Tip()
       // .attr('height', d => height - yScale(d.value))
       .attr('y', d => (d.value >= 0 ? yScale(d.value) : yScale(0))) // Ensure y is non-negative
       .attr('height', d => Math.abs(yScale(0) - yScale(d.value))) // 
+      .attr("fill", (d)=> (d.value >= 0 ? "darkgreen" : "darkred"))
       .on('mouseover', (event, d) => tip.show(d, event.currentTarget))       
       .on('mouseout', tip.hide);
   };
