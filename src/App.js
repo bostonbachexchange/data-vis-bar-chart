@@ -4,7 +4,7 @@ import * as d3 from 'd3';
 import d3Tip from 'd3-tip';
 
 function App() {
-  const [dataset, setDataset] = useState([]);
+  // const [dataset, setDataset] = useState([]);
   const [country, setCountry] = useState("USA"); 
   const [countries, setCountries] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -20,11 +20,10 @@ function App() {
       const countriesData = await fetchCountriesByPage(currentPage);
       setCountries(prevCountries => [...prevCountries, ...countriesData]);
     };
-  
     fetchCountries();
   }, [currentPage]);
   
-  // Add a button or some UI element to load more countries
+  // button or some UI element to load more countries
   const loadMoreCountries = () => {
     setCurrentPage(prevPage => prevPage + 1);
   };
@@ -39,7 +38,7 @@ function App() {
           date: entry.date,
           value: entry.value,
         }));
-        setDataset(chartData)
+        // setDataset(chartData)
         setCountry(countryData)
         drawChart(chartData);
       })
@@ -47,10 +46,9 @@ function App() {
   }, [country]);
 
   const drawChart = (chartData) => {
-    const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+    const margin = { top: 20, right: 30, bottom: 40, left: 40 };
     const width = 1200 - margin.left - margin.right;
-    const height = 400 - margin.top - margin.bottom;
-
+    const height = 450 - margin.top - margin.bottom;
 
     // Check if SVG already exists
     const existingSvg = d3.select('#chart-container svg');
@@ -59,21 +57,16 @@ function App() {
         .attr('width', width + margin.left + margin.right)
         .attr('height', height + margin.top + margin.bottom)
         .append('g')
-        // .attr('fill', (d) => {
-        //   console.log('Value:', d); // Add this console log
-        //   return d.value >= 0 ? 'darkgreen' : 'darkred';
-        // })
         .attr('transform', `translate(${margin.left},${margin.top})`)
       : existingSvg.select('g');
 
-const tip = d3Tip()
-  .attr('class', 'd3-tip')
-  .style('background-color', '#f8f9fa') // Set the background color
-  .style('color', '#212529') 
-  .offset([-10, 0])
-  .html(d => `<strong>${d.date}:</strong> ${d.value.toString().substring(0, 3)}%`);
-
-    svg.call(tip);
+    const tip = d3Tip()
+      .attr('class', 'd3-tip')
+      .style('background-color', '#f8f9fa') 
+      .style('color', '#212529') 
+      .offset([-10, 0])
+      .html(d => `<strong>${d.date}:</strong> ${d.value.toString().substring(0, 4)}%`);
+      svg.call(tip);
 
     const xScale = d3
       .scaleBand()
@@ -90,7 +83,7 @@ const tip = d3Tip()
 
     // const xAxis = d3.axisBottom(xScale).tickFormat(d => d).tickSize(0);
     const xAxis = d3.axisBottom(xScale)
-    .tickFormat(d => d)
+    .tickFormat(d => d )
     .ticks(chartData.length) // Set the number of ticks equal to the number of data points
     .tickValues(chartData.map(d => d.date).reverse());
     
@@ -103,14 +96,14 @@ const tip = d3Tip()
     svg
     .append('g')
     .attr('class', 'x-axis')
-    .attr('transform', `translate(0, ${height})`)
+    .attr('transform', `translate(0, ${height })`)
     .call(xAxis)
     .selectAll('text')
     .attr('transform', 'rotate(-45)')
     .style('text-anchor', 'end')
     .attr('dx', '-.5em') // Adjustments for rotated text
     .attr('dy', '.15em')
-    .style('font-size', '12px') // Adjust font size as needed
+    .style('font-size', '12px') 
     .style('margin-top', '15px');
     
 
@@ -130,7 +123,7 @@ const tip = d3Tip()
       // .attr('y', d => yScale(d.value))
       // .attr('height', d => height - yScale(d.value))
       .attr('y', d => (d.value >= 0 ? yScale(d.value) : yScale(0))) // Ensure y is non-negative
-      .attr('height', d => Math.abs(yScale(0) - yScale(d.value))) // 
+      .attr('height', d => Math.abs(yScale(0) - yScale(d.value)) ) // 
       .attr("fill", (d)=> (d.value >= 0 ? "darkgreen" : "darkred"))
       .on('mouseover', (event, d) => tip.show(d, event.currentTarget))       
       .on('mouseout', tip.hide);
@@ -142,23 +135,28 @@ const tip = d3Tip()
 
   return (
     <div className="text-center">
-      <h1>Inflation {country.country}</h1>
+      <h1>Inflation for {country.country}</h1>
+      <p>from 1973 until current</p>
       <div className='m-2 p-4' id="chart-container"></div>
       <h2 className='mt-2'>Select a Country</h2>
       <form className='mb-4'>
         <label>
-          Select Country:
+          <b>Select Country: </b>
+      
           <select value={country} onChange={handleCountryChange}>
-            {countries.map(country => (
-              <option  value={country.id}>
+              <option  value={""} key={"blank"}>
+                Select
+              </option>
+            {countries.map((country, index) => (
+              <option  value={country.id} key={index}>
                 {country.name}
               </option>
             ))}
           </select>
         </label>
       </form>
+      <div>{countries.length}</div>
       <button onClick={loadMoreCountries}>Load More Countries</button>
-
     </div>
   );
 }
