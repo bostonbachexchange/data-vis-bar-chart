@@ -76,7 +76,8 @@ function App() {
 
     const yScale = d3
       .scaleLinear()
-      .domain([d3.min(chartData, d => d.value), d3.max(chartData, d => d.value)])
+      .domain([ 0 , d3.max(chartData, d => d.value)])
+      // .domain([ d3.min(chartData, d => d.value) >= 0 ? d3.min(chartData, d => d.value) <= 0: 0 , d3.max(chartData, d => d.value)])
       .range([height, 0]);
 
     // const xAxis = d3.axisBottom(xScale).tickFormat(d => d).tickSize(0);
@@ -93,18 +94,7 @@ function App() {
     // Remove existing axis and bars
     svg.selectAll('.x-axis, .y-axis, .bar').remove();
 
-    svg
-    .append('g')
-    .attr('class', 'x-axis')
-    .attr('transform', `translate(0, ${height })`)
-    .call(xAxis)
-    .selectAll('text')
-    .attr('transform', 'rotate(-45)')
-    .style('text-anchor', 'end')
-    .attr('dx', '-.5em') // Adjustments for rotated text
-    .attr('dy', '.15em')
-    .style('font-size', '12px') 
-    .style('margin-top', '15px');
+    
     
 
     svg
@@ -124,9 +114,22 @@ function App() {
       // .attr('height', d => height - yScale(d.value))
       .attr('y', d => (d.value >= 0 ? yScale(d.value) : yScale(0))) // Ensure y is non-negative
       .attr('height', d => Math.abs(yScale(0) - yScale(d.value)) ) // 
-      .attr("fill", (d)=> (d.value >= 0 ? "darkgreen" : "darkred"))
+      .attr("fill", (d)=> (d.value >= 0 ? "darkgreen" : "rgb(255, 22, 0)"))
       .on('mouseover', (event, d) => tip.show(d, event.currentTarget))       
       .on('mouseout', tip.hide);
+
+    svg
+      .append('g')
+      .attr('class', 'x-axis')
+      .attr('transform', `translate(0, ${height })`)
+      .call(xAxis)
+      .selectAll('text')
+      .attr('transform', 'rotate(-45)')
+      .style('text-anchor', 'end')
+      .attr('dx', '-.5em') // Adjustments for rotated text
+      .attr('dy', '.15em')
+      .style('font-size', '12px') 
+      .style('margin-top', '15px');
   };
 
   const handleCountryChange = (event) => {
