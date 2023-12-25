@@ -9,6 +9,7 @@ function App() {
   const [countries, setCountries] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
 
+
   const fetchCountriesByPage = async (page) => {
     const response = await fetch(`https://api.worldbank.org/v2/country?format=json&page=${page}`);
     const data = await response.json();
@@ -45,7 +46,7 @@ function App() {
       .catch(error => console.error('Error fetching data:', error));
   }, [country]);
 
-  const drawChart = (chartData) => {
+    const drawChart = (chartData) => {
     const margin = { top: 20, right: 30, bottom: 40, left: 40 };
     const width = 1200 - margin.left - margin.right;
     const height = 450 - margin.top - margin.bottom;
@@ -93,9 +94,6 @@ function App() {
 
     // Remove existing axis and bars
     svg.selectAll('.x-axis, .y-axis, .bar').remove();
-
-    
-    
 
     svg
       .append('g')
